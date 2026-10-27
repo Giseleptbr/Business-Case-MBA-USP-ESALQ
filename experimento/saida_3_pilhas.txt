@@ -1,0 +1,24 @@
+============================================================================================================================================
+7. RISCO RESIDUAL POR PILHA DE CONTROLES
+   'passa' = defeito que nenhum controle da pilha detectou em NENHUMA das 30 sementes
+============================================================================================================================================
+               pilha  controles  defeitos_que_passam  pior_erro_SUM_%  pior_erro_qualquer_metrica_%  exposicao_somada_R$                              quais
+         A_so_schema          1                    9           326.87                        385.78          35268500.74 D1, D2, D3, D4, D5, D6, D7, D8, D9
+        B_padrao_dbt          2                    9           326.87                        385.78          35268500.74 D1, D2, D3, D4, D5, D6, D7, D8, D9
+ C_dbt_mais_contagem          3                    3            62.15                         71.99           6087767.94                         D6, D7, D8
+D_completa_com_valor          4                    1             2.03                          2.26            170687.45                                 D6
+
+============================================================================================================================================
+8. O SALTO DECISIVO: o que a reconciliacao de VALOR acrescenta sobre a pilha C
+============================================================================================================================================
+Defeitos que SO a reconciliacao de valor pega: ['D7_desconto_ignorado', 'D8_preco_de_grao_errado']
+   D7_desconto_ignorado           erro SUM    +8.11%   R$     682,912.54
+   D8_preco_de_grao_errado        erro SUM   +62.15%   R$   5,234,167.95
+
+Risco residual mesmo com a pilha completa: ['D6_sem_dedup']
+   D6_sem_dedup                   erro SUM    +2.03%   P95  +2.26%   R$   170,687.45
+
+============================================================================================================================================
+9. DEFEITOS INVISIVEIS NA METRICA PRINCIPAL mas materiais em outra
+============================================================================================================================================
+   D2_inner_join                  SUM +0.000%  mas  MEDIAN_ticket +4.45%

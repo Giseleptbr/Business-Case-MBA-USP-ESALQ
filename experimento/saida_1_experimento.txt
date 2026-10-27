@@ -1,0 +1,13 @@
+--- verificacao do harness (referencia SQL vs verdade construida) ---
+  SUM_faturamento      verdade=      6,605,359.23  sql_ref=      6,605,359.23  dif=+0.000000%
+  AVG_ticket           verdade=            239.16  sql_ref=            239.16  dif=+0.000000%
+  MEDIAN_ticket        verdade=            159.99  sql_ref=            159.99  dif=+0.000000%
+  P95_cauda            verdade=            711.64  sql_ref=            711.64  dif=+0.000000%
+  COUNT_pedidos        verdade=         27,619.00  sql_ref=         27,619.00  dif=+0.000000%
+  MAX_pedido           verdade=          8,447.63  sql_ref=          8,447.63  dif=+0.000000%
+  SUM_pior_conta       verdade=      1,065,124.00  sql_ref=      1,065,124.00  dif=+0.000000%
+
+Faturamento verdadeiro (semente 42): R$ 6,605,359.23  em 27,619 pedidos
+
+Rodadas: 270 (30 sementes x 9 defeitos)
+Salvo em /home/claude/resultado_viab_llm.csv

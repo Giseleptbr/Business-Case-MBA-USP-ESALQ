@@ -1,0 +1,86 @@
+======================================================================================================================================================
+1. EXECUCAO E DANO — media de 30 sementes, desvio-padrao entre parenteses
+======================================================================================================================================================
+                     defeito excecao  SUM_faturamento       AVG_ticket    MEDIAN_ticket         P95_cauda    COUNT_pedidos   SUM_pior_conta
+              D1_fanout_join     nao +326.866 (2.734) +340.112 (2.962) +252.994 (3.867) +385.780 (19.199)   -3.010 (0.105) +316.117 (8.974)
+               D2_inner_join     nao   +0.000 (0.000)   +3.103 (0.112)   +4.447 (0.421)    +1.362 (0.279)   -3.010 (0.105)   +0.000 (0.000)
+ D3_null_logica_tres_valores     nao   -5.586 (0.355)   -2.766 (0.332)   -2.220 (0.205)    -3.418 (0.728)   -2.900 (0.088)   -8.661 (1.335)
+D4_valor_de_filtro_fabricado     nao   +8.729 (0.294)   +0.053 (0.172)   +0.001 (0.230)    +0.073 (0.328)   +8.671 (0.188)   +8.924 (1.094)
+    D5_coluna_de_data_errada     nao   -4.428 (0.167)   +0.001 (0.167)   -0.044 (0.188)    +0.063 (0.311)   -4.429 (0.142)   -4.389 (0.644)
+                D6_sem_dedup     nao   +2.029 (0.072)   +2.029 (0.072)   +1.569 (0.183)    +2.263 (0.398)   +0.000 (0.000)   +1.993 (0.298)
+        D7_desconto_ignorado     nao   +8.113 (0.048)   +8.113 (0.048)   +8.172 (0.279)    +8.100 (0.322)   +0.000 (0.000)   +8.141 (0.135)
+     D8_preco_de_grao_errado     nao  +62.153 (0.400)  +62.153 (0.400)  +42.887 (0.758)   +71.994 (3.769)   +0.000 (0.000)  +61.997 (2.111)
+      D9_fronteira_de_janela     nao   -1.046 (0.097)   +0.015 (0.087)   +0.013 (0.101)    +0.018 (0.157)   -1.061 (0.060)   -1.007 (0.271)
+
+======================================================================================================================================================
+2. MATRIZ DEFEITO x CONTROLE — fracao das 30 sementes em que o controle disparou
+======================================================================================================================================================
+                              C1_reconciliacao_contagem  C2_dbt_generico  C3_schema  C4_reconciliacao_valor  ALGUM_controle  erro_SUM_medio_%  erro_abs_SUM_R$
+defeito                                                                                                                                                       
+D1_fanout_join                                    1.000            0.000      0.000                   1.000           1.000           326.866   27,510,975.991
+D2_inner_join                                     1.000            0.000      0.000                   0.000           1.000             0.000            0.000
+D3_null_logica_tres_valores                       1.000            0.000      0.000                   0.967           1.000            -5.586     -473,025.248
+D4_valor_de_filtro_fabricado                      1.000            0.000      0.000                   1.000           1.000             8.729      735,508.768
+D5_coluna_de_data_errada                          1.000            0.000      0.000                   0.000           1.000            -4.428     -372,952.148
+D6_sem_dedup                                      0.000            0.000      0.000                   0.000           0.000             2.029      170,687.454
+D7_desconto_ignorado                              0.000            0.000      0.000                   1.000           1.000             8.113      682,912.537
+D8_preco_de_grao_errado                           0.000            0.000      0.000                   1.000           1.000            62.153    5,234,167.950
+D9_fronteira_de_janela                            1.000            0.000      0.000                   0.000           1.000            -1.046      -88,270.641
+
+======================================================================================================================================================
+3. DEFEITOS QUE PASSAM TOTALMENTE SILENCIOSOS (nenhuma excecao, nenhum controle)
+======================================================================================================================================================
+              sementes_silenciosas  erro_SUM  erro_AVG  erro_P95  erro_COUNT  erro_pior_conta       reais
+defeito                                                                                                  
+D6_sem_dedup                    30     2.029     2.029     2.263       0.000            1.993 170,687.454
+
+======================================================================================================================================================
+4. CEGUEIRA POR CAMADA — materialidade por METRICA: defeito e material se
+   QUALQUER metrica de negocio erra mais de 1% em media
+======================================================================================================================================================
+Defeitos materiais (9 de 9): ['D1_fanout_join', 'D2_inner_join', 'D3_null_logica_tres_valores', 'D4_valor_de_filtro_fabricado', 'D5_coluna_de_data_errada', 'D6_sem_dedup', 'D7_desconto_ignorado', 'D8_preco_de_grao_errado', 'D9_fronteira_de_janela']
+
+C1_reconciliacao_contagem
+   detecta : ['D1_fanout_join', 'D2_inner_join', 'D3_null_logica_tres_valores', 'D4_valor_de_filtro_fabricado', 'D5_coluna_de_data_errada', 'D9_fronteira_de_janela']
+   e cego a: ['D6_sem_dedup', 'D7_desconto_ignorado', 'D8_preco_de_grao_errado']
+
+C2_dbt_generico
+   detecta : (nenhum)
+   e cego a: ['D1_fanout_join', 'D2_inner_join', 'D3_null_logica_tres_valores', 'D4_valor_de_filtro_fabricado', 'D5_coluna_de_data_errada', 'D6_sem_dedup', 'D7_desconto_ignorado', 'D8_preco_de_grao_errado', 'D9_fronteira_de_janela']
+
+C3_schema
+   detecta : (nenhum)
+   e cego a: ['D1_fanout_join', 'D2_inner_join', 'D3_null_logica_tres_valores', 'D4_valor_de_filtro_fabricado', 'D5_coluna_de_data_errada', 'D6_sem_dedup', 'D7_desconto_ignorado', 'D8_preco_de_grao_errado', 'D9_fronteira_de_janela']
+
+C4_reconciliacao_valor
+   detecta : ['D1_fanout_join', 'D3_null_logica_tres_valores', 'D4_valor_de_filtro_fabricado', 'D7_desconto_ignorado', 'D8_preco_de_grao_errado']
+   e cego a: ['D2_inner_join', 'D5_coluna_de_data_errada', 'D6_sem_dedup', 'D9_fronteira_de_janela']
+
+algum_controle
+   detecta : ['D1_fanout_join', 'D2_inner_join', 'D3_null_logica_tres_valores', 'D4_valor_de_filtro_fabricado', 'D5_coluna_de_data_errada', 'D7_desconto_ignorado', 'D8_preco_de_grao_errado', 'D9_fronteira_de_janela']
+   e cego a: ['D6_sem_dedup']
+
+
+======================================================================================================================================================
+5. DISPERSAO DO DANO — ha variancia para explicar?
+======================================================================================================================================================
+                                 mean    std      min      max
+defeito                                                       
+D1_fanout_join               +326.866 +2.734 +320.326 +331.831
+D2_inner_join                  +0.000 +0.000   -0.000   +0.000
+D3_null_logica_tres_valores    -5.586 +0.355   -6.334   -4.989
+D4_valor_de_filtro_fabricado   +8.729 +0.294   +8.128   +9.261
+D5_coluna_de_data_errada       -4.428 +0.167   -4.838   -4.148
+D6_sem_dedup                   +2.029 +0.072   +1.877   +2.169
+D7_desconto_ignorado           +8.113 +0.048   +7.974   +8.206
+D8_preco_de_grao_errado       +62.153 +0.400  +61.229  +63.133
+D9_fronteira_de_janela         -1.046 +0.097   -1.263   -0.836
+
+Amplitude do erro em SUM entre defeitos: -6.33% a +331.83%
+Defeitos com viés NEGATIVO (subestima): ['D3_null_logica_tres_valores', 'D5_coluna_de_data_errada', 'D9_fronteira_de_janela']
+Defeitos com viés POSITIVO (superestima): ['D1_fanout_join', 'D4_valor_de_filtro_fabricado', 'D6_sem_dedup', 'D7_desconto_ignorado', 'D8_preco_de_grao_errado']
+
+======================================================================================================================================================
+6. METRICA MAIS VULNERAVEL por defeito silencioso
+======================================================================================================================================================
+  D6_sem_dedup                   P95_cauda +2.26%  |  SUM_faturamento +2.03%  |  AVG_ticket +2.03%

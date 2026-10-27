@@ -1,0 +1,734 @@
+% =====================================================================
+% BUSINESS CASE — MBA USP/Esalq em Engenharia de Software
+% Gisele Fonseca de Aguiar Silva
+%
+% COMO USAR NO OVERLEAF
+%   Arquivo UNICO: nao precisa de nenhum outro arquivo para compilar.
+%   1. Novo projeto -> Blank Project -> apague o conteudo e cole este
+%      arquivo inteiro. Ou Upload Project enviando so este .tex.
+%   2. Compilador: pdfLaTeX (ja e o padrao do Overleaf).
+%   3. A logo oficial do programa e OPCIONAL para compilar: baixe-a do
+%      Sistema e envie como logo-mba.png. Sem ela o documento compila
+%      normalmente e mostra uma caixa no lugar da imagem.
+%   4. Para usar a Arial de verdade, veja a observacao no fim do bloco
+%      de normas e compile com LuaLaTeX.
+%
+% ESTRUTURA OBRIGATÓRIA (item 6 do manual), nesta ordem:
+%   Folha de Rosto -> Título + Sumário Executivo -> Introdução ->
+%   Desenvolvimento -> Discussão dos Resultados -> Considerações Finais
+%   -> Referências -> Apêndice(s)/Anexo(s) (opcionais)
+%
+% LIMITE DE PÁGINAS: 30, incluindo apêndices e anexos.
+%   O manual abre exceção de 50 páginas para Business Cases de
+%   Engenharia de Software com temática de Implementação de
+%   Algoritmo(s) de Machine Learning. Este trabalho NÃO implementa
+%   algoritmo, então o limite aplicável é 30 até que o Especialista
+%   de Business Case confirme o contrário.
+% =====================================================================
+\documentclass[11pt,a4paper]{article}
+% ================================================================
+% NORMAS DE FORMATACAO MBA USP/Esalq, embutidas neste arquivo
+% (Manual de Instrucoes e Normas: Tabelas 3, 4 e 5; itens 17 e 18)
+% Arquivo unico de proposito: NAO depende de nenhum .sty externo.
+% ================================================================
+% =====================================================================
+% Normas de formatação do Business Case MBA USP/Esalq
+% Codificado a partir do Manual de Instruções e Normas (Tabelas 3, 4 e 5
+% e itens 17 e 18). Cada regra está comentada com a sua origem.
+% =====================================================================
+
+% ---------- Codificação e idioma ----------
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+% No Overleaf o idioma brasileiro está sempre disponível. O teste abaixo
+% só existe para que o arquivo também compile em instalações TeX enxutas,
+% sem o pacote de hifenização portuguesa.
+\IfFileExists{portuges.ldf}
+  {\usepackage[brazil]{babel}}
+  {\usepackage[english]{babel}
+   \GenericWarning{}{Hifenizacao portuguesa ausente;
+     compilando em ingles. No Overleaf isto nao ocorre}}
+
+% ---------- Fonte: Arial 11, cor preta (Tabela 3) --------------------
+% Arial não acompanha o TeX. TeX Gyre Heros é clone metricamente
+% compatível com Helvetica/Arial e é o substituto aceito em pdfLaTeX.
+% Para usar a Arial de verdade, compile com LuaLaTeX e troque este
+% bloco pelo bloco comentado ao final deste arquivo.
+% Sem escala: Arial e Helvetica compartilham as mesmas métricas, então
+% 11 pt aqui corresponde a Arial 11 pt. Não use [scaled], que reduziria
+% o corpo e descumpriria a norma.
+\usepackage[scaled=1.0]{helvet}
+\renewcommand{\familydefault}{\sfdefault}
+
+% ---------- Página: A4 retrato, margens 2,5 cm (Tabela 3) ------------
+\usepackage[a4paper,top=2.5cm,bottom=2.5cm,left=2.5cm,right=2.5cm,
+                headheight=38pt,headsep=12pt,footskip=1.0cm]{geometry}
+
+% ---------- Espaçamento (Tabela 4) ----------------------------------
+% 1,5 é o padrão do corpo do texto; 1,0 em seções específicas.
+\usepackage{setspace}
+\onehalfspacing
+
+% ---------- Recuo de primeira linha: 1,25 cm (Tabela 3) -------------
+\setlength{\parindent}{1.25cm}
+\setlength{\parskip}{0pt}
+
+% ---------- Texto justificado (Tabela 3) ----------------------------
+% É o padrão do LaTeX. Referências ficam alinhadas à esquerda — ver
+% o ambiente referencias mais abaixo.
+\usepackage{ragged2e}
+
+% ---------- Cabeçalho repetido e paginação (item 18.1) --------------
+% Cabeçalho em todas as páginas, alinhado à esquerda, com a logo no
+% canto superior direito. Paginação em arábicos no canto inferior
+% direito, Arial 9, iniciando na folha de rosto (página 1).
+\usepackage{fancyhdr}
+\usepackage{graphicx}
+
+% Sem nomes com @, para que este bloco também funcione quando colado
+% direto no preâmbulo de um .tex, onde @ não é letra.
+\newcommand{\bccursonome}{Engenharia de Software}
+\newcommand{\bcanodefesa}{2027}
+\newcommand{\bccurso}[1]{\renewcommand{\bccursonome}{#1}}
+\newcommand{\bcano}[1]{\renewcommand{\bcanodefesa}{#1}}
+
+\newcommand{\bccabecalho}{%
+  \fontsize{9}{11}\selectfont
+  \begin{minipage}[c]{0.74\textwidth}
+    \RaggedRight Business Case apresentado para obtenção do título de
+    especialista em \bccursonome{} -- \bcanodefesa{}
+  \end{minipage}%
+  \hfill
+  \begin{minipage}[c]{0.24\textwidth}
+    \raggedleft
+    % A logo oficial do programa deve ser baixada do Sistema e salva
+    % como logo-mba.png na raiz do projeto. Sem o arquivo, o documento
+    % compila mesmo assim e mostra um aviso no lugar.
+    \IfFileExists{logo-mba.png}{%
+      \includegraphics[height=1.05cm]{logo-mba.png}}{%
+      \fbox{\scriptsize\ttfamily logo-mba.png}}
+  \end{minipage}%
+}
+
+\fancypagestyle{bcpadrao}{%
+  \fancyhf{}
+  \renewcommand{\headrulewidth}{0pt}
+  \renewcommand{\footrulewidth}{0pt}
+  \fancyhead[L]{\bccabecalho}
+  \fancyfoot[R]{\fontsize{9}{11}\selectfont\thepage}
+}
+\pagestyle{bcpadrao}
+
+% ---------- Títulos de seção (Tabela 3 e itens 18.3 a 18.7) ---------
+% Negrito, alinhados à esquerda, sem recuo e SEM numeração.
+% Separados do texto por um espaço de caractere.
+\usepackage[explicit]{titlesec}
+
+\titleformat{\section}{\normalfont\bfseries}{}{0pt}{\RaggedRight #1}
+\titlespacing*{\section}{0pt}{\baselineskip}{\baselineskip}
+
+% Subtítulos: negrito, primeiras letras maiúsculas, sem numeração,
+% com recuo especial de 1,25 cm. Usar apenas quando fundamentais.
+\titleformat{\subsection}[hang]{\normalfont\bfseries}{}{0pt}
+            {\hspace*{1.25cm}#1}
+\titlespacing*{\subsection}{0pt}{\baselineskip}{\baselineskip}
+
+% Impede numeração automática em qualquer nível.
+\setcounter{secnumdepth}{0}
+
+% ---------- Figuras e Tabelas (itens 17.1 e 17.2) -------------------
+% Títulos, fontes e notas em espaçamento simples. O uso de QUADROS
+% não é permitido pelo manual — só Figuras e Tabelas.
+\usepackage{caption}
+\usepackage{booktabs}
+\usepackage{array}
+
+% Corpo 11 como no texto (a norma não prevê legenda em corpo menor).
+% Os nomes são fixados à mão para não dependerem do idioma do babel.
+\captionsetup{font={sf},labelsep=period,
+              justification=justified,singlelinecheck=false,
+              skip=4pt}
+\captionsetup[table]{position=above,name=Tabela}
+\captionsetup[figure]{position=below,name=Figura}
+% Confira o estilo do rótulo contra o exemplo dos Anexos do manual: as
+% tabelas do próprio manual aparecem como "Tabela 3." sem negrito. Para
+% usar negrito, acrescente labelfont=bf acima.
+
+% Fonte obrigatória logo abaixo da figura/tabela, espaçamento simples.
+\newcommand{\fonteprop}[1]{%
+  \par\vspace{2pt}%
+  {\singlespacing\fontsize{11}{13}\selectfont\RaggedRight Fonte: #1\par}}
+\newcommand{\fonteoriginal}{\fonteprop{Resultados originais do estudo}}
+
+% Nota de tabela, quando houver, vem APÓS a fonte.
+\newcommand{\notatab}[1]{%
+  \par{\singlespacing\fontsize{11}{13}\selectfont\RaggedRight Nota: #1\par}}
+
+% ---------- Sumário Executivo (item 18.2) ---------------------------
+% Parágrafo único, SEM recuo na primeira linha, espaçamento simples,
+% no máximo 250 palavras, pretérito perfeito, sem citações.
+\newenvironment{sumarioexecutivo}
+  {\par\vspace{\baselineskip}%
+   \noindent\textbf{Sumário Executivo}\par\vspace{\baselineskip}%
+   \begingroup\singlespacing\setlength{\parindent}{0pt}}
+  {\par\endgroup\vspace{\baselineskip}}
+
+% ---------- Referências (item 18.7) ---------------------------------
+% Alinhadas à esquerda, sem recuo de primeira linha, espaçamento
+% simples. Nenhum estilo padrão do LaTeX reproduz os modelos do item 21
+% do manual, então a lista é escrita à mão, o que também garante
+% aderência. Use \refitem para cada entrada.
+\newenvironment{referencias}
+  {\begingroup\singlespacing\RaggedRight\setlength{\parindent}{0pt}}
+  {\par\endgroup}
+\newcommand{\refitem}[1]{#1\par\vspace{0.5\baselineskip}}
+
+% ---------- Normatização do texto (Tabela 5) ------------------------
+% Sigla entre COLCHETES após a definição, na primeira ocorrência.
+\newcommand{\sigla}[2]{#1 [#2]}
+% Expressão estrangeira não corrente vai entre aspas; latim em itálico.
+\newcommand{\estrangeiro}[1]{``#1''}
+\newcommand{\latim}[1]{\emph{#1}}
+% Separador de milhar com ponto e decimal com vírgula.
+\usepackage{siunitx}
+\sisetup{output-decimal-marker={,},group-separator={.},
+         group-minimum-digits=4,detect-all}
+
+% ---------- Utilidades ----------------------------------------------
+\usepackage{xcolor}
+\usepackage[hidelinks]{hyperref}
+\usepackage{microtype}
+
+% Marcador visível de pendência. Rode \pendenciasoff antes de depositar
+% para conferir que não sobrou nenhuma.
+\newcommand{\pend}[1]{\textcolor{red}{\textbf{[PENDENTE: #1]}}}
+\newcommand{\pendenciasoff}{\renewcommand{\pend}[1]{}}
+
+% =====================================================================
+% Para Arial de verdade: troque o bloco de fonte acima por este e
+% compile com LuaLaTeX (menu Overleaf: Compilador -> LuaLaTeX).
+% A Arial precisa ser enviada como arquivo .ttf para o projeto.
+%
+% \usepackage{fontspec}
+% \setmainfont{Arial}[
+%   BoldFont       = Arial Bold,
+%   ItalicFont     = Arial Italic,
+%   BoldItalicFont = Arial Bold Italic]
+% =====================================================================
+% ----------------- fim das normas -------------------------------
+
+% Curso e ano de defesa, usados no cabeçalho de todas as páginas.
+\bccurso{Engenharia de Software}
+\bcano{2027}
+
+\begin{document}
+
+% =====================================================================
+% FOLHA DE ROSTO — página 1 (item 18.1)
+% Espaçamento simples. Título em negrito, centralizado, no máximo 15
+% palavras, com maiúscula apenas na inicial e em nomes próprios.
+% =====================================================================
+\begin{singlespace}
+\thispagestyle{bcpadrao}
+\vspace*{1.5cm}
+
+\begin{center}
+\textbf{Custo do erro silencioso em pipelines analíticos: onde posicionar a
+validação de dados}
+\end{center}
+
+\vspace{2\baselineskip}
+
+\begin{center}
+Gisele Fonseca de Aguiar Silva\textsuperscript{1}*;
+\pend{Nome do Especialista de Business Case}\textsuperscript{2}
+\end{center}
+
+\vspace{\baselineskip}
+
+{\fontsize{9}{11}\selectfont\RaggedRight
+\noindent\textsuperscript{1}Mestra em Administração. Engenheira de dados.
+E-mail do autor correspondente: gih52sim@gmail.com\par
+\noindent\textsuperscript{2}\pend{Titulação do Especialista}.
+\pend{Instituição}. E-mail: \pend{e-mail}\par
+}
+\end{singlespace}
+
+\newpage
+
+% =====================================================================
+% TÍTULO + SUMÁRIO EXECUTIVO — página 2 (item 18.2)
+% Arial 11, espaçamento simples. Parágrafo único, sem recuo, no máximo
+% 250 palavras, pretérito perfeito do indicativo, SEM citações.
+% =====================================================================
+\begin{singlespace}
+\begin{center}
+\textbf{Custo do erro silencioso em pipelines analíticos: onde posicionar a
+validação de dados}
+\end{center}
+\end{singlespace}
+
+\begin{sumarioexecutivo}
+\pend{redigir ao final, quando os resultados estiverem fechados --- 250
+palavras, parágrafo único, pretérito perfeito, sem citações. Rascunho
+provisório abaixo, a revisar.}
+Pipelines analíticos entregaram métricas incorretas sem gerar qualquer
+alarme quando o código de transformação continha defeito semântico, isto
+é, lógica que executou normalmente mas não correspondeu à intenção de
+negócio. O estudo examinou esse problema no contexto de equipes de
+engenharia de dados que mantêm transformações que não escreveram.
+Construiu-se um experimento de injeção de defeitos sobre um pipeline
+analítico com dados simulados gerados a partir de procedimentos
+estatísticos declarados, no qual nove mecanismos de defeito, ancorados em
+taxonomia publicada, foram confrontados com quatro camadas de controle de
+qualidade de dados, medindo-se o erro induzido em sete métricas de
+negócio ao longo de trinta repetições. \pend{complementar com a segunda
+frente (levantamento de projetos públicos) e com os resultados finais.}
+Os testes de schema e os testes genéricos de unicidade, nulidade e
+integridade referencial não detectaram nenhum dos nove defeitos, por
+verificarem a forma da tabela e não o significado do número. A
+reconciliação de contagem de linhas reduziu a exposição de forma
+expressiva, mas permaneceu cega aos defeitos que preservam a contagem, um
+dos quais produziu erro superior a sessenta por cento no faturamento
+apurado. O estudo entregou uma matriz de alocação de controles, indicando
+qual verificação posicionar em cada camada conforme o mecanismo de
+defeito e as métricas consumidas pelo negócio, com o risco residual de
+cada configuração dimensionado em valor financeiro.
+\end{sumarioexecutivo}
+
+% =====================================================================
+% INTRODUÇÃO (itens 6.2 e 18.3)
+% No máximo DUAS páginas (~35 linhas por página). Proibido: subtópicos,
+% marcadores, figuras, tabelas e quadros. Três partes, nesta ordem:
+%   (i) problema ou oportunidade; (ii) contexto; (iii) objetivo.
+% O objetivo deve ser enunciado no ÚLTIMO parágrafo.
+% =====================================================================
+\section{Introdução}
+
+\pend{Parte (i) --- problema ou oportunidade. Fórmula sugerida pelo
+material do curso: ``o problema de A tem o efeito de B, com o impacto de
+C''. Aqui: código de transformação que não foi escrito por quem o mantém
+produz erro semântico que executa em silêncio (A), a métrica entregue ao
+negócio sai errada sem alarme (B), e a decisão tomada sobre ela carrega
+exposição financeira não medida (C).}
+
+\pend{Parte (ii) --- contexto. Engenharia de dados em ambiente de setor
+financeiro; a prática corrente de validação apoiada em testes genéricos e
+de schema; e a literatura recente sobre falha silenciosa em SQL gerado
+por modelos de linguagem, que documenta a taxa de erro semântico mas
+avalia a consulta isolada, e não o dano à métrica quando a consulta vira
+modelo de transformação em produção.}
+
+\pend{Parte (iii) --- objetivo, no último parágrafo, único, claro,
+específico e mensurável. Dizer o que se vai MEDIR, não ``analisar'' nem
+``compreender''. Rascunho: ``O objetivo deste trabalho foi quantificar o
+erro induzido em métricas de negócio por mecanismos de defeito semântico
+em modelos de transformação de dados e determinar a capacidade de
+detecção de cada camada de controle de qualidade, estabelecendo uma
+matriz de alocação de controles com o risco residual de cada configuração
+expresso em valor financeiro.''}
+
+% =====================================================================
+% DESENVOLVIMENTO (itens 6.3 e 18.4)
+% Subtítulos são permitidos e ajudam. Figuras e Tabelas permitidas,
+% QUADROS não. Conteúdo esperado: caracterização do objeto de estudo,
+% diagnóstico do problema, métodos aplicados e, quando aplicável, plano
+% de implementação. Em trabalho com viés científico, esta seção descreve
+% a metodologia: tipo de pesquisa, abordagem, fontes, instrumentos de
+% coleta, critérios de análise e procedimentos de validade.
+% =====================================================================
+\section{Desenvolvimento}
+
+\subsection{Caracterização do Objeto de Estudo}
+
+O objeto deste estudo é a camada de transformação de pipelines analíticos
+e o conjunto de controles de qualidade que a cerca. Entende-se por camada
+de transformação o código que converte dados brutos ingeridos de sistemas
+de origem em tabelas agregadas, consumidas por relatórios e indicadores de
+negócio. Em arquiteturas correntes essa camada é escrita predominantemente
+em \estrangeiro{Structured Query Language} [SQL] e organizada em modelos
+versionados, executados em cadeia por um orquestrador.
+
+O ambiente de referência é o de equipes de engenharia de dados que operam
+pipelines em produção no setor financeiro, no qual indicadores derivados
+alimentam decisões de crédito, exposição e prestação de contas
+regulatória. Três características desse ambiente delimitam o problema
+tratado. A primeira é a separação entre quem escreveu a transformação e
+quem a mantém: parte relevante da lógica em operação foi construída por
+equipes anteriores e é sustentada por profissionais que não participaram
+da sua concepção. A segunda é a tolerância a falhas adotada por projeto,
+em que conversões e junções são deliberadamente permissivas para que a
+execução não interrompa em presença de dado inesperado. A terceira é a
+assimetria entre a velocidade de produção de código de transformação e a
+velocidade de produção de verificação, acentuada pela adoção de
+assistentes de geração de código.
+
+As partes interessadas são a equipe de engenharia de dados, responsável
+pela construção e manutenção dos modelos; as áreas de negócio, que
+consomem os indicadores sem acesso à lógica que os produz; e as funções de
+controle interno e auditoria, que respondem pela fidedignidade dos números
+reportados. A assimetria de informação entre esses grupos é o que torna a
+falha silenciosa relevante: o consumidor do indicador não dispõe de meio
+próprio para questioná-lo.
+
+\subsection{Diagnóstico do Problema}
+
+O defeito tratado neste estudo não é a interrupção do pipeline, e sim a
+sua conclusão bem-sucedida com resultado incorreto. Um modelo de
+transformação com defeito semântico é aquele cuja consulta é sintaticamente
+válida, executa sem exceção e materializa a tabela de destino, mas não
+corresponde à intenção de negócio que deveria implementar. A literatura da
+área de geração automática de consultas denomina essa classe de ocorrência
+falha silenciosa, por oposição à falha ruidosa, que interrompe a execução e
+é, por isso, barata de detectar.
+
+A magnitude do fenômeno está documentada para consultas geradas por
+modelos de linguagem. Erros de natureza semântica respondem por parcela
+expressiva do total de erros observados em conjuntos de avaliação
+consagrados, e a maior parte deles decorre de má interpretação do esquema
+do banco ou da pergunta formulada, e não de erro de sintaxe
+\pend{inserir citações autor-ano após confirmar as autorias completas nas
+fontes originais}. Trabalhos recentes de verificação relatam, ainda, que a
+autoavaliação do próprio modelo gerador tende à confiança excessiva, com
+baixa revocação na identificação dos seus erros, o que inviabiliza
+delegar a verificação ao mesmo mecanismo que produziu o código.
+
+Dois limites dessa literatura delimitam a lacuna aqui tratada. O primeiro
+é de objeto: a avaliação recai sobre a consulta isolada, em tarefa de
+pergunta e resposta, e não sobre o modelo de transformação em operação,
+cujo resultado incorreto é materializado em tabela e consumido por um
+indicador. O segundo é de desfecho: mede-se a correção da consulta, e não
+o dano causado à métrica de negócio. Em paralelo, a literatura de
+qualidade de pipelines de dados oferece taxonomia empiricamente
+fundamentada de fatores de influência e causas-raiz, mas não quantifica o
+custo de detectar a falha em cada camada, conforme declarado pelos
+próprios autores (Foidl et al., 2024).
+
+A restrição prática que sustenta a relevância da intervenção é a natureza
+dos controles usualmente adotados. Os testes de uso corrente verificam
+propriedades da forma da tabela, como unicidade da chave, ausência de
+nulos, integridade referencial e conformidade de tipos. Defeito semântico,
+por definição, preserva a forma: a tabela resultante continua tendo chave
+única, colunas não nulas e referências válidas, ainda que os valores
+estejam errados. Decorre daí a hipótese que o estudo submete a teste: a
+pilha de controles de maior penetração na prática é estruturalmente
+incapaz de detectar a classe de defeito que mais cresce em frequência.
+
+\subsection{Procedimentos Metodológicos}
+
+O estudo é de natureza aplicada e abordagem quantitativa, e combina dois
+delineamentos complementares. O primeiro é um experimento controlado de
+injeção de defeitos, conduzido sobre um pipeline analítico com verdade
+conhecida por construção, no qual se manipula o mecanismo de defeito e se
+observa, simultaneamente, o erro induzido em cada métrica de negócio e a
+detecção obtida por cada camada de controle. O segundo é um levantamento
+de caráter exploratório sobre projetos públicos de transformação de dados,
+destinado a estabelecer quais camadas de controle são efetivamente
+declaradas na prática.
+
+A articulação entre os dois delineamentos é o que permite responder à
+pergunta de gestão. O experimento estabelece o que cada camada de controle
+detecta; o levantamento estabelece quais camadas as equipes de fato
+adotam. O cruzamento dos dois resultados fornece a exposição associada à
+configuração de controles mais frequente, que é o insumo da decisão de
+alocação.
+
+A opção por dados simulados no experimento decorre de exigência do próprio
+desenho: a mensuração do erro induzido pressupõe conhecer o valor correto
+da métrica, o que inexiste em base operacional. As normas institucionais
+admitem a geração de dados simulados para os Business Cases de Engenharia
+de Software, condicionada à fundamentação em procedimentos estatísticos
+bem definidos e à sua descrição detalhada, requisito atendido na subseção
+seguinte. Nenhum dado de organização privada foi utilizado em qualquer das
+duas frentes.
+
+\subsection{Geração dos Dados Simulados}
+
+O cenário simulado reproduz um domínio de pedidos e itens de pedido, com
+100 contas de cliente, 30.000 pedidos e janela de observação de 90 dias.
+A métrica central é o faturamento líquido do período, obtida pela soma,
+sobre os pedidos não cancelados, do produto entre quantidade, preço
+unitário e complemento do desconto. Os procedimentos estatísticos de
+geração estão na Tabela~\ref{tab:geracao}.
+
+\begin{table}[htbp]
+\centering
+\caption{Procedimentos estatísticos de geração do cenário simulado}
+\label{tab:geracao}
+\begin{singlespace}
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{Elemento} & \textbf{Procedimento} \\
+\midrule
+Porte da conta        & Lognormal($\mu=0$; $\sigma=0,8$), normalizado pela média \\
+Alocação de pedidos   & Multinomial com probabilidade proporcional ao porte \\
+Itens por pedido      & $1 + $ Poisson($\lambda=2$) \\
+Quantidade por item   & $1 + $ Poisson($\lambda=1$) \\
+Preço unitário        & Lognormal($\mu=3,2$; $\sigma=0,7$) escalado pelo porte \\
+Desconto              & Uniforme discreta sobre $\{0; 0,05; 0,10; 0,15\}$ \\
+Status do pedido      & Multinomial (cancelado 0,08; pendente 0,07; concluído 0,85) \\
+Status ausente        & Bernoulli, $p = 0,030\,(1 + 0,90z)$, $z$ truncado em $[-1;3]$ \\
+Duplicação de item    & Bernoulli($p=0,02$) \\
+Pedido sem item       & Bernoulli($p=0,03$) \\
+\bottomrule
+\end{tabular}
+\end{singlespace}
+\fonteoriginal
+\notatab{$z$ é o valor padronizado do pedido. A probabilidade crescente de
+status ausente com o valor do pedido reproduz falha correlacionada ao
+valor, em que o defeito atinge preferencialmente os registros de maior
+magnitude.}
+\end{table}
+
+Quatro complicações foram deliberadamente embutidas nos dados de origem,
+de modo que o cenário apresentasse as ambiguidades que um modelo de
+transformação precisa resolver corretamente. A primeira é a ausência de
+status em parte dos pedidos, decorrente de lacuna de ingestão, com
+probabilidade crescente conforme o valor do pedido; trata-se de falha
+correlacionada ao valor, que atinge preferencialmente os registros de
+maior magnitude. A segunda é a duplicação de linhas de item por dupla
+carga da origem, que exige deduplicação a jusante. A terceira é a
+existência de pedidos válidos sem nenhum item, cuja receita é
+legitimamente nula. A quarta é a defasagem entre a data do pedido e a data
+de embarque, que cria a possibilidade de filtragem pela coluna errada.
+
+\subsection{Validação do Instrumento}
+
+Antes de qualquer injeção de defeito, verificou-se que o instrumento media
+o que se propunha a medir. Para tanto, a verdade do cenário foi calculada
+diretamente a partir do processo gerador, sem passar por consulta, e
+comparada ao resultado de uma implementação de referência em SQL. As duas
+apurações coincidiram nas sete métricas observadas, com diferença relativa
+nula até a sexta casa decimal. Essa conferência é condição de validade
+interna do experimento: sem ela, qualquer erro atribuído a um defeito
+injetado poderia ser, na verdade, erro do próprio aparato de medição.
+
+\subsection{Mecanismos de Defeito Injetados}
+
+Foram implementados nove mecanismos de defeito, cada um correspondendo a
+uma classe documentada na literatura de erros em consultas geradas e em
+qualidade de pipelines, de modo que o catálogo não resultasse de escolha
+arbitrária do pesquisador. Todos foram implementados como consultas
+executáveis sobre as mesmas tabelas de origem, e todos produzem tabela de
+destino sem levantar exceção. A Tabela~\ref{tab:defeitos} descreve os
+mecanismos.
+
+\begin{table}[htbp]
+\centering
+\caption{Mecanismos de defeito semântico injetados no modelo de transformação}
+\label{tab:defeitos}
+\begin{singlespace}
+\fontsize{10}{12}\selectfont
+\begin{tabular}{@{}p{0.8cm}p{6.6cm}p{7.2cm}@{}}
+\toprule
+\textbf{Cód.} & \textbf{Defeito injetado} & \textbf{Classe na taxonomia} \\
+\midrule
+D1 & Junção de pedidos a itens com soma do total do cabeçalho & Erro de grão, com multiplicação do valor pelo número de itens \\
+D2 & Junção interna no lugar de junção externa à esquerda & Erro de síntese, com descarte de pedidos sem item \\
+D3 & Comparação de desigualdade sobre coluna que admite nulo & Má interpretação do banco, pela lógica de três valores \\
+D4 & Literal de filtro grafado em caixa divergente da origem & Valor de filtro fabricado, que torna o filtro inoperante \\
+D5 & Filtragem pela data de embarque no lugar da data do pedido & Má interpretação do esquema \\
+D6 & Omissão da deduplicação da dupla carga de itens & Omissão de etapa de limpeza \\
+D7 & Desconsideração do percentual de desconto & Semântica de coluna incorreta \\
+D8 & Produto entre preço máximo e quantidade somada do pedido & Erro de grão aritmético em pedido com vários itens \\
+D9 & Intervalo fechado sobre carimbo de tempo & Erro de fronteira, que exclui o último dia da janela \\
+\bottomrule
+\end{tabular}
+\end{singlespace}
+\fonteoriginal
+\notatab{A classificação apoia-se nas taxonomias de erro semântico em
+consultas geradas e de causas-raiz em pipelines de dados
+\pend{citar autor-ano após confirmar autorias}. Nenhum dos nove
+mecanismos interrompe a execução.}
+\end{table}
+
+\subsection{Camadas de Controle Avaliadas}
+
+Cada modelo defeituoso foi submetido a quatro camadas de controle,
+dispostas em ordem crescente de custo de implantação, descritas na
+Tabela~\ref{tab:controles}. A escolha das camadas reproduz a prática
+corrente: testes de forma e de esquema são os de menor custo e maior
+penetração, ao passo que a reconciliação de valor exige a existência de um
+total de controle independente na origem, nem sempre disponível.
+
+\begin{table}[htbp]
+\centering
+\caption{Camadas de controle de qualidade avaliadas e respectivos critérios de disparo}
+\label{tab:controles}
+\begin{singlespace}
+\fontsize{10}{12}\selectfont
+\begin{tabular}{@{}p{0.8cm}p{5.2cm}p{8.6cm}@{}}
+\toprule
+\textbf{Cód.} & \textbf{Camada} & \textbf{Critério de disparo} \\
+\midrule
+C1 & Reconciliação de contagem & Divergência superior a 0,1\% entre a contagem de pedidos no destino e a contagem apurada independentemente na origem \\
+C2 & Testes genéricos de forma & Violação de unicidade da chave, de ausência de nulos na chave ou na medida, de integridade referencial ou de não negatividade \\
+C3 & Esquema e contrato & Ausência de coluna esperada ou divergência de tipo na medida \\
+C4 & Reconciliação de valor & Desvio superior a 5\% entre a razão do total do destino pelo total declarado na origem e a razão calibrada em período saudável \\
+\bottomrule
+\end{tabular}
+\end{singlespace}
+\fonteoriginal
+\notatab{O total declarado na origem não é oráculo: inclui imposto e frete,
+que o modelo analítico exclui por definição. Por isso a reconciliação de
+valor opera por razão calibrada com banda de tolerância, e não por
+igualdade. A banda de 5\% é parâmetro de projeto, não medida de campo; a
+sensibilidade do resultado a esse valor foi avaliada e consta da Discussão
+dos Resultados.}
+\end{table}
+
+\subsection{Métricas de Negócio Observadas}
+
+Para cada execução registrou-se o erro relativo induzido em sete métricas,
+escolhidas por representarem usos distintos do mesmo conjunto de dados: a
+soma do faturamento, a média e a mediana do valor por pedido, o percentil
+95 da distribuição de valores, a contagem de pedidos, o valor máximo
+observado e a soma da conta de maior faturamento. A inclusão de métricas de
+cauda e de concentração justifica-se por serem as que alimentam decisões de
+exposição e limite, e por serem as menos cobertas pelos controles de uso
+corrente.
+
+Cada combinação de mecanismo de defeito foi executada sob 30 sementes
+aleatórias distintas, totalizando 270 execuções, e os resultados são
+reportados como média e desvio-padrão entre repetições. A repetição
+responde a uma limitação de desenhos com semente única, nos quais um valor
+nulo de erro pode decorrer de sorteio favorável e não de ausência de
+efeito.
+
+\subsection{Levantamento de Projetos Públicos de Transformação}
+
+A segunda frente destina-se a estabelecer quais camadas de controle são
+efetivamente declaradas em projetos reais. A população de interesse é a dos
+repositórios públicos que contêm projeto de transformação de dados, e o
+quadro amostral foi construído por busca de código sobre o arquivo de
+configuração que caracteriza esse tipo de projeto. Como o serviço de busca
+limita o número de resultados por consulta, o quadro foi montado por
+estratificação em nove faixas de tamanho de repositório, procedimento que
+supera esse limite sem recorrer a amostragem por conveniência.
+
+Aplicaram-se cinco critérios de exclusão, nesta ordem, com registro da
+contagem por critério: repositório derivado de outro, por não representar
+decisão própria de teste; repositório arquivado, por não refletir prática
+corrente; ausência de diretório de modelos; projeto com menos de cinco
+modelos, por caracterizar exercício; e indício de material didático no nome
+ou na descrição. A amostragem é aleatória simples sem reposição sobre o
+quadro elegível, com semente fixa, de modo a permitir replicação.
+
+A mensuração consiste na leitura dos arquivos de declaração de testes de
+cada projeto e na contagem, por tipo, dos testes efetivamente declarados,
+incluindo os contratos de esquema e os pacotes de teste adotados. Cada
+projeto é então classificado na camada mais alta que possui, segundo o
+mapeamento da Tabela~\ref{tab:mapeamento}, que é o que torna as duas
+frentes comparáveis.
+
+\begin{table}[htbp]
+\centering
+\caption{Correspondência entre camada de controle e teste observável em projeto real}
+\label{tab:mapeamento}
+\begin{singlespace}
+\fontsize{10}{12}\selectfont
+\begin{tabular}{@{}p{0.8cm}p{4.4cm}p{9.4cm}@{}}
+\toprule
+\textbf{Cód.} & \textbf{Camada} & \textbf{Declaração observável no projeto} \\
+\midrule
+C1 & Reconciliação de contagem & Testes de igualdade e de limite de contagem de linhas entre relações; testes de anomalia de volume \\
+C2 & Testes genéricos de forma & Testes nativos de unicidade, ausência de nulos, valores aceitos e integridade referencial \\
+C3 & Esquema e contrato & Contrato de modelo com imposição ativa, restrições de coluna e testes de conformidade de tipo \\
+C4 & Reconciliação de valor & Pacotes de comparação entre relações; testes de expressão sobre agregados; testes singulares com indício de reconciliação \\
+\bottomrule
+\end{tabular}
+\end{singlespace}
+\fonteoriginal
+\notatab{A identificação de reconciliação em teste singular é heurística,
+baseada em padrões textuais, e superestima a camada C4. O valor obtido
+para essa camada deve ser lido como limite superior.}
+\end{table}
+
+O instrumento de leitura foi aferido por dois procedimentos antes da
+coleta. O primeiro consistiu em submetê-lo a casos construídos com gabarito
+conhecido, cobrindo os formatos de declaração em uso, inclusive a
+renomeação recente da chave de declaração de testes, que um leitor ingênuo
+desconsideraria por completo. O segundo consistiu na conferência contra
+arquivos de declaração de projetos reais, com comparação manual do
+resultado. \pend{reportar a execução da coleta e o número de projetos
+efetivamente analisados quando a frente for concluída.}
+
+% =====================================================================
+% DISCUSSÃO DOS RESULTADOS (itens 6.4 e 18.5)
+% Seção OBRIGATÓRIA. Apresentar, discutir e interpretar os resultados
+% obtidos ou projetados, de forma comparativa à literatura. Comparação
+% antes/depois. Viabilidade em quatro fatores: operacional, financeira,
+% estratégica e social. Citações permitidas aqui.
+% =====================================================================
+\section{Discussão dos Resultados}
+
+\subsection{Detecção por Camada de Controle}
+
+\pend{Tabela da matriz defeito $\times$ controle. Resultado central: os
+testes genéricos e o teste de schema não detectaram nenhum dos nove
+defeitos.}
+
+\subsection{Risco Residual por Pilha de Controles}
+
+\pend{Tabela das pilhas A a D com exposição somada. Discutir que adotar
+testes genéricos sobre nada não reduziu exposição, que a reconciliação de
+contagem teve o melhor retorno, e que o restante só cai com reconciliação
+de valor.}
+
+\subsection{Vulnerabilidade Dependente da Métrica}
+
+\pend{Discutir o defeito invisível no faturamento e material na mediana,
+e a cauda como pior caso.}
+
+\subsection{Viabilidade da Proposta}
+
+\pend{Quatro fatores: operacional (funciona na prática), financeira (faz
+sentido econômico), estratégica (alinhada à visão da organização) e
+social (impacto sobre as pessoas). Separar ganhos tangíveis de
+intangíveis.}
+
+% =====================================================================
+% CONSIDERAÇÕES FINAIS (itens 6.5 e 18.6)
+% Contribuições, impactos na tomada de decisão, coerência entre
+% diagnóstico e proposta, valor gerado e perspectivas futuras.
+% NÃO fazer: repetir problema ou metodologia, reapresentar dados e
+% resultados, copiar trechos de seções anteriores.
+% Esta seção NÃO deve conter citações de referências.
+% =====================================================================
+\section{Considerações Finais}
+
+\pend{Contribuições práticas, valor gerado e perspectivas futuras. Sem
+citações, sem reapresentar dados.}
+
+% =====================================================================
+% REFERÊNCIAS (itens 18.7, 19, 20 e 21)
+% Alinhadas à esquerda, sem recuo, espaçamento simples. Apenas obras
+% citadas no texto. Citação no estilo "autor, ano" ou "nome (ano)".
+% Somente citações indiretas; apud não é permitido; nada de citação
+% direta. Sigla entre COLCHETES na primeira ocorrência.
+% Os modelos de cada tipo de fonte estão no item 21 do manual --- CONFIRA
+% cada entrada contra o modelo correspondente antes de depositar.
+% =====================================================================
+\section{Referências}
+
+\begin{referencias}
+\refitem{FOIDL, H.; GOLENDUKHINA, V.; RAMLER, R.; FELDERER, M. Data
+pipeline quality: influencing factors, root causes of data-related
+issues, and processing problem areas for developers. \textbf{Journal of
+Systems and Software}, v. 207, 111855, 2024.}
+
+\refitem{\pend{demais referências --- conferir cada uma contra os modelos
+do item 21 do manual, que distingue periódicos, relatórios de dados
+online, livros, trabalhos acadêmicos, documentos jurídicos e anais.}}
+\end{referencias}
+
+% =====================================================================
+% APÊNDICES E ANEXOS (opcionais, item 6.7)
+% Apêndice: elaborado pelo autor. Anexo: documento externo.
+% CONTAM para o limite de páginas.
+% =====================================================================
+% \newpage
+% \section{Apêndice A --- Catálogo completo dos mecanismos de defeito}
+% \pend{conteúdo}
+
+\end{document}

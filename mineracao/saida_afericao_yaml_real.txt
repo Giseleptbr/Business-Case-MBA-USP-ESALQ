@@ -1,0 +1,4 @@
+Afericao contra YAML real: dbt-labs/jaffle_shop/models/schema.yml
+  modelos= 2  modelos_com_teste= 2  contratos= 0
+  testes= {'unique': 2, 'not_null': 8, 'relationships': 1, 'accepted_values': 1}
+  pilha classificada= B_padrao_dbt

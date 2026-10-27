@@ -1,0 +1,12 @@
+  OK    fixture 1
+  OK    fixture 2
+  OK    fixture 3
+  OK    fixture 4
+  OK    classificacao 1: B_padrao_dbt
+  OK    classificacao 2: A_so_schema
+  OK    classificacao 3: Z_sem_controle
+  OK    classificacao 4: C_dbt_mais_contagem
+  OK    classificacao 5: D_completa_com_valor
+  OK    classificacao 6: D_completa_com_valor
+
+AUTOTESTE PASSOU

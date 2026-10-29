@@ -13,3 +13,7 @@ mineracao/mineracao_dbt/*.tar.gz
 *.synctex.gz
 *.bbl
 *.blg
+
+# macOS
+.DS_Store
+**/.DS_Store

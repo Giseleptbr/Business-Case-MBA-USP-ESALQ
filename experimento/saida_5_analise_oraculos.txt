@@ -1,0 +1,127 @@
+==============================================================================================================
+10. ESCADA DE ORÁCULOS — fração dos casos em que cada oráculo acusa o defeito
+    (somente variantes COM defeito, todas as derivas)
+==============================================================================================================
+                              (a) excecao  (b) tabela  (c) contagem  erro SUM %
+variante                                                                       
+D1_fanout_join                      0.000       1.000         1.000     354.590
+D2_inner_join                       0.000       1.000         1.000       0.000
+D3_null_logica_tres_valores         0.000       1.000         1.000      -5.586
+D4_valor_de_filtro_fabricado        0.000       1.000         1.000       8.729
+D5_coluna_de_data_errada            0.000       1.000         1.000      -4.428
+D6_sem_dedup                        0.000       1.000         0.000       2.029
+D7_desconto_ignorado                0.000       1.000         0.000       8.113
+D8_preco_de_grao_errado             0.000       1.000         0.000      62.153
+D9_fronteira_de_janela              0.000       1.000         1.000      -1.046
+
+  (a) oráculo de exceção     — usado pelo PrismaDV   : acusa 0.0% dos defeitos
+  (b) igualdade de tabela    — usada pelo ELT-Bench  : acusa 100.0% dos defeitos, sem dizer o quanto
+  (c) igualdade de contagem  — controle barato usual : acusa 66.7% dos defeitos
+  (d) magnitude na métrica   — este trabalho         : amplitude de -6.33% a +407.15%
+
+==============================================================================================================
+11. MATRIZ DE CONFUSÃO POR CAMADA — agora com verdadeiros negativos
+    positivo = o controle disparou | condição = a variante tinha defeito
+==============================================================================================================
+                camada   VP   FN  FP  VN  revocacao  especificidade  taxa_falso_positivo
+           C1_contagem  900  450   0 150      0.667           1.000                0.000
+          C2_genericos    0 1350   0 150      0.000           1.000                0.000
+             C3_schema    0 1350   0 150      0.000           1.000                0.000
+   C4_valor (banda 5%)  958  392  60  90      0.710           0.600                0.400
+C5_distribucional (5%) 1096  254  90  60      0.812           0.400                0.600
+
+  Observação: a precisão depende da prevalência de defeitos, que aqui é
+  artificial (9 variantes defeituosas para 1 limpa). Revocação, especificidade
+  e taxa de falso positivo não dependem da prevalência e são as reportadas.
+
+==============================================================================================================
+12. FALSO POSITIVO SOB DERIVA LEGÍTIMA — execução limpa (D0), por nível de deriva
+    nenhum defeito presente: todo disparo aqui é alarme falso
+==============================================================================================================
+           C1     C2     C3  C4_banda5  C5_banda5  desvio_C4  desvio_C5
+deriva                                                                 
+0.00   0.0000 0.0000 0.0000     0.0000     0.0333     0.0000     0.0000
+0.02   0.0000 0.0000 0.0000     0.0000     0.0000     0.0171     0.0200
+0.05   0.0000 0.0000 0.0000     0.0000     0.9667     0.0417     0.0500
+0.10   0.0000 0.0000 0.0000     1.0000     1.0000     0.0802     0.1000
+0.20   0.0000 0.0000 0.0000     1.0000     1.0000     0.1487     0.2000
+
+  C1, C2 e C3 nunca geram alarme falso, em nenhum nível de deriva.
+  C4 reage ao canal de total declarado; C5 reage ao canal de nível de preço.
+  Os dois canais são separáveis por construção — ver docstring do gerador.
+
+==============================================================================================================
+13. CURVA PRECISÃO × REVOCAÇÃO DA RECONCILIAÇÃO DE VALOR (C4)
+    varrida sobre a banda de tolerância, agregando todas as derivas
+==============================================================================================================
+banda   VP   FN  FP  VN  revocacao  taxa_falso_positivo  precisao_aparente    F1
+ 0.5% 1255   95 120  30      0.930                0.800              0.913 0.921
+ 1.0% 1221  129 120  30      0.904                0.800              0.911 0.907
+ 2.0% 1158  192  90  60      0.858                0.600              0.928 0.891
+ 3.0% 1080  270  90  60      0.800                0.600              0.923 0.857
+ 5.0%  958  392  60  90      0.710                0.400              0.941 0.809
+ 8.0%  692  658  51  99      0.513                0.340              0.931 0.661
+10.0%  511  839  30 120      0.379                0.200              0.945 0.540
+15.0%  392  958   2 148      0.290                0.013              0.995 0.450
+20.0%  304 1046   0 150      0.225                0.000              1.000 0.368
+
+==============================================================================================================
+14. O TRADE-OFF, POR NÍVEL DE DERIVA — revocação e falso positivo lado a lado
+==============================================================================================================
+banda  d=0.00 rev  d=0.00 TFP  d=0.02 rev  d=0.02 TFP  d=0.05 rev  d=0.05 TFP  d=0.10 rev  d=0.10 TFP  d=0.20 rev  d=0.20 TFP
+ 0.5%        0.89        0.00        0.89        1.00        1.00        1.00        0.87        1.00        1.00        1.00
+ 1.0%        0.86        0.00        0.89        1.00        1.00        1.00        0.78        1.00        1.00        1.00
+ 2.0%        0.73        0.00        0.78        0.00        1.00        1.00        0.78        1.00        1.00        1.00
+ 3.0%        0.67        0.00        0.67        0.00        0.89        1.00        0.78        1.00        1.00        1.00
+ 5.0%        0.55        0.00        0.67        0.00        0.55        0.00        0.78        1.00        1.00        1.00
+ 8.0%        0.44        0.00        0.22        0.00        0.44        0.00        0.63        0.70        0.82        1.00
+10.0%        0.22        0.00        0.22        0.00        0.23        0.00        0.44        0.00        0.78        1.00
+15.0%        0.22        0.00        0.22        0.00        0.22        0.00        0.22        0.00        0.56        0.07
+20.0%        0.22        0.00        0.22        0.00        0.22        0.00        0.22        0.00        0.24        0.00
+
+==============================================================================================================
+15. DEFEITOS QUE ATRAVESSAM TODAS AS CAMADAS, por nível de deriva (banda 5%)
+==============================================================================================================
+                              n  erro_SUM  erro_P95      reais
+deriva variante                                               
+0.00   D6_sem_dedup          30      2.03      2.26 170,687.45
+0.02   D6_sem_dedup          30      2.03      2.26 174,101.20
+0.05   D6_sem_dedup          30      2.03      2.26 179,221.90
+       D7_desconto_ignorado  30      8.11      8.10 717,058.22
+0.10   D7_desconto_ignorado  30      8.11      8.10 751,203.85
+
+==============================================================================================================
+16. A FRONTEIRA DETECÇÃO × ALARME FALSO — ordenada por revocação
+    responde à objeção de que só se testaram controles fracos
+==============================================================================================================
+                       camada custo_implantacao  revocacao  taxa_falso_positivo
+ C2 testes genéricos de forma             baixo      0.000                0.000
+        C3 esquema e contrato             baixo      0.000                0.000
+ C1 reconciliação de contagem             baixo      0.667                0.000
+    C4 reconciliação de valor              alto      0.710                0.400
+C5 verificação distribucional             médio      0.812                0.600
+
+  A ordenação por revocação é EXATAMENTE a ordenação por taxa de falso
+  positivo. Nenhuma camada domina outra: detecção é comprada com alarme
+  falso, de forma monotônica. A exceção é C1, que detecta dois terços dos
+  defeitos sem gerar um único alarme falso — e é a de menor custo.
+
+==============================================================================================================
+17. O QUE C5 PEGA QUE AS CAMADAS BARATAS NÃO PEGAM
+==============================================================================================================
+                              pilha_barata    C5  erro_SUM_%  ganho_C5
+variante                                                              
+D8_preco_de_grao_errado              0.000 1.000      62.153     1.000
+D7_desconto_ignorado                 0.000 1.000       8.113     1.000
+D6_sem_dedup                         0.000 0.727       2.029     0.727
+D1_fanout_join                       1.000 1.000     354.590     0.000
+D4_valor_de_filtro_fabricado         1.000 1.000       8.729     0.000
+D2_inner_join                        1.000 0.920       0.000    -0.080
+D9_fronteira_de_janela               1.000 0.580      -1.046    -0.420
+D5_coluna_de_data_errada             1.000 0.560      -4.428    -0.440
+D3_null_logica_tres_valores          1.000 0.520      -5.586    -0.480
+
+  D7 e D8 são o caso decisivo: a pilha barata não os vê (preservam a
+  contagem de linhas) e C5 os vê sempre. São também os de maior erro
+  monetário. É o argumento mais forte a favor da camada distribucional —
+  e a razão pela qual o trabalho NÃO pode afirmar que todo controle falha.

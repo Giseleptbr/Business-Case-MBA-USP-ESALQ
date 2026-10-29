@@ -1,0 +1,11 @@
+Calibrando os controles em período saudável (deriva = 0)...
+  razão média gold/origem (C4): 0.870549
+  média calibrada do faturamento por pedido (C5): 304.98
+  deriva 0.00 concluída
+  deriva 0.02 concluída
+  deriva 0.05 concluída
+  deriva 0.10 concluída
+  deriva 0.20 concluída
+
+Execuções: 1500 (30 sementes x 5 derivas x 10 variantes)
+Salvo em resultado_oraculos.csv

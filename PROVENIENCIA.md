@@ -142,6 +142,122 @@ Os arquivos reais coletados estão em `mineracao/yaml_reais/`.
 
 ---
 
+## 3-bis. Experimento II — escada de oráculos, verdadeiros negativos e falso positivo
+
+Acrescentado em 29 out. 2026, após a revisão sistemática da literatura. O Experimento I
+permanece intacto: este NÃO o substitui, acrescenta o que a RSL mostrou que o campo exige.
+
+**Scripts:** `experimento/experimento_oraculos.py` e `experimento/analise_oraculos.py`
+**Dados:** `experimento/resultado_oraculos.csv` — 1.500 execuções
+(30 sementes x 5 níveis de deriva x 10 variantes, sendo uma delas sem defeito)
+**Saídas:** `saida_4_oraculos.txt` e `saida_5_analise_oraculos.txt`
+
+### Por que existe
+
+A RSL mostrou que a literatura comparável (Redyuk et al., EDBT 2021; Tu et al., KDD '23)
+reporta **matriz de confusão e precisão/revocação por tipo de defeito**. O Experimento I
+só submetia aos controles as variantes defeituosas, de modo que havia apenas verdadeiro
+positivo e falso negativo — era possível calcular revocação, e mais nada.
+
+Acrescentar uma execução limpa não bastaria: sobre um cenário idêntico ao de calibração
+nenhum controle dispara, e a taxa de falso positivo sairia zero por construção. Por isso
+foi introduzida **deriva legítima de negócio** entre o período de calibração e o período
+medido — deslocamento do mix de alíquota e elevação do frete, nenhum dos quais é defeito
+e nenhum dos quais altera a verdade da métrica.
+
+### Resultado 1 — escada de oráculos (seção 10 da saída)
+
+| Oráculo | Quem o usa | Acusa |
+|---|---|---|
+| exceção de execução | PrismaDV | **0,0%** dos defeitos |
+| igualdade exata de tabela | ELT-Bench | **100,0%**, sem informar a magnitude |
+| igualdade de contagem de linhas | prática corrente | **66,7%** |
+| magnitude do erro na métrica | este trabalho | amplitude de **−6,33% a +409,54%** |
+
+Os dois oráculos da literatura são os extremos inúteis: um não vê nada, o outro vê tudo
+sem distinguir erro de 0,0% de erro de 409%. O caso D2 é o exemplo limpo: a igualdade de
+tabela o acusa, e o erro no faturamento é exatamente 0,000%.
+
+### Resultado 2 — matriz de confusão (seção 11)
+
+| Camada | VP | FN | FP | VN | Revocação | Especificidade | Taxa de falso positivo |
+|---|---|---|---|---|---|---|---|
+| C1 contagem | 900 | 450 | 0 | 150 | 0,667 | 1,000 | **0,000** |
+| C2 genéricos | 0 | 1350 | 0 | 150 | **0,000** | 1,000 | 0,000 |
+| C3 schema | 0 | 1350 | 0 | 150 | **0,000** | 1,000 | 0,000 |
+| C4 valor (banda 5%) | 959 | 391 | 60 | 90 | 0,710 | 0,600 | **0,400** |
+
+**O achado econômico central do Business Case está nesta tabela.** A única camada que
+detecta mais que a reconciliação de contagem é também a única que gera alarme falso. O
+ganho marginal de C1 para C4 é de **4,3 pontos percentuais de revocação**, comprados com
+**40% de taxa de falso positivo**.
+
+A precisão não é reportada como resultado porque depende da prevalência de defeitos, que
+aqui é artificial (nove variantes defeituosas para uma limpa). Revocação, especificidade
+e taxa de falso positivo não dependem da prevalência.
+
+### Resultado 3 — falso positivo sob deriva (seção 12)
+
+C1, C2 e C3 nunca disparam falsamente, em nenhum nível de deriva. C4 com banda de 5%
+tem taxa de falso positivo de 0% até deriva de 0,05 e de **100% a partir de deriva de
+0,10**. O limiar é abrupto.
+
+### Resultado 4 — a curva de trade-off (seções 13 e 14)
+
+Apertar a banda de 5% para 0,5% eleva a revocação de 0,710 para 0,938 e a taxa de falso
+positivo de 0,400 para 0,800. A tabela 14 cruza banda e deriva e é a tabela de decisão:
+**a banda ótima depende do nível de deriva, que não é conhecido de antemão.**
+
+> ⚠️ **Advertência metodológica que precisa constar do texto.** Em deriva de 0,20 com
+> banda de 5%, a revocação de C4 é 1,00 — e a taxa de falso positivo também é 1,00. O
+> controle dispara sempre. Revocação alta sem especificidade não é detecção, é alarme
+> permanente, e os defeitos "detectados" nessa faixa foram detectados pelo motivo errado.
+> Nenhum número de revocação deste experimento deve ser lido sem a especificidade ao lado.
+
+### Resultado 5 — o que ainda atravessa tudo (seção 15)
+
+Com banda de 5%, D6 (omissão de deduplicação) atravessa todas as camadas até deriva de
+0,05, e D7 (desconto ignorado, R$ 682.912 de erro) atravessa a partir de deriva de 0,05.
+Quais defeitos sobrevivem **muda conforme a deriva**, o que é mais um argumento de que a
+configuração de controles não pode ser fixada sem conhecer o regime de variação do negócio.
+
+### Resultado 6 — a camada distribucional C5, e a fronteira detecção × alarme falso
+
+Acrescentada em 29 out. 2026, em resposta à objeção mais provável de um parecerista:
+que o trabalho teria testado apenas controles fracos. C5 reproduz a família de
+verificações que a literatura comparável avalia (Deequ, TensorFlow Data Validation,
+Auto-Validate): tamanho, completude, média, desvio-padrão, mediana e máximo contra
+valores calibrados em período saudável, mais teste de Kolmogorov-Smirnov de duas
+amostras. Para que C5 também pudesse gerar alarme falso, acrescentou-se um segundo
+canal de deriva legítima — inflação de preço —, separável do canal que atinge C4.
+
+| Camada | Custo | Revocação | Taxa de falso positivo |
+|---|---|---|---|
+| C2 testes genéricos de forma | baixo | **0,000** | 0,000 |
+| C3 esquema e contrato | baixo | **0,000** | 0,000 |
+| C1 reconciliação de contagem | baixo | 0,667 | **0,000** |
+| C4 reconciliação de valor | alto | 0,710 | 0,400 |
+| C5 verificação distribucional | médio | **0,812** | **0,600** |
+
+**A ordenação por revocação é exatamente a ordenação por taxa de falso positivo.**
+Nenhuma camada domina outra: detecção é comprada com alarme falso, de forma
+monotônica. A exceção é C1, que detecta dois terços dos defeitos sem gerar um único
+alarme falso, e é a de menor custo de implantação.
+
+O ganho específico de C5 está nos dois defeitos que a pilha barata não enxerga porque
+preservam a contagem de linhas: **D7 (desconto ignorado, +8,1%) e D8 (erro de grão,
++62,2%), ambos detectados por C5 em 100% das execuções**. São também os de maior erro
+monetário.
+
+> Consequência para a tese, e é uma correção importante: **o trabalho não pode afirmar
+> que todo controle falha.** Existe uma camada que detecta os defeitos de maior impacto.
+> A afirmação defensável é mais precisa: as camadas que as equipes efetivamente declaram
+> — completude, unicidade, validade e integridade referencial, conforme Ustunboyacioglu
+> et al. (EASE 2024) — detectam zero de nove, enquanto a camada que os detectaria custa
+> 60% de taxa de falso positivo e não é a que se encontra declarada na prática.
+
+---
+
 ## 4. O que NÃO está medido — declarar como limitação
 
 Esta seção é tão importante quanto as anteriores. Nenhum número abaixo existe,
